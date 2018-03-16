@@ -1,0 +1,7 @@
+﻿/*@import '~@angular/material/prebuilt-themes/deeppurple-amber.css';*/
+
+.mat-divider {
+    width: 90%;
+    transform: translate(5%);
+}
+

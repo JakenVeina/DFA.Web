@@ -1,0 +1,20 @@
+﻿<div class="mat-typography unselectable">
+    <mat-icon>{{IconName}}</mat-icon>
+    <span class="mat-title">{{Title}}</span>
+    <span [ngSwitch]="State"
+          class="status-icon">
+        <mat-icon *ngSwitchCase="NavMenuItemState.Active"
+                  style="color: mediumseagreen;">
+            lens
+        </mat-icon>
+        <mat-icon *ngSwitchCase="NavMenuItemState.Inactive"
+                  style="color: slategray;">
+            lens
+        </mat-icon>
+        <mat-icon *ngSwitchCase="NavMenuItemState.Offline"
+                  style="color: rosybrown;">
+            lens
+        </mat-icon>
+        <span style="color: white;">{{StateText}}</span>
+    </span>
+</div>
