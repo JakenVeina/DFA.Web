@@ -16,7 +16,6 @@ using DFA.Web.Models;
 using DFA.Web.Models.Criteria;
 using DFA.Web.Models.Entities;
 using DFA.Web.Models.Requests;
-using DFA.Web.Models.Responses;
 using DFA.Web.Models.ViewModels;
 using DFA.Web.Services.Interfaces;
 
@@ -47,45 +46,28 @@ namespace DFA.Web.Api.NewsPosts
 
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> Get([FromQuery] DataPageRequest request, [FromQuery] TimeIntervalSearchCriteria criteria)
+        public async Task<IActionResult> Get([FromQuery] DataPageRequest request)
         {
             Contract.Requires(request != null);
-            Contract.Requires(criteria != null);
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            if (request.PageSize > 10)
-                request.PageSize = 10;
+            if (request.LastRowIndex > 10)
+                request.LastRowIndex = 10;
 
             var userId = AppAuthenticationService.CurrentUserClaims?.Id;
 
-            var newsPosts = DataContext.NewsPosts
-                .Include(x => x.UnreadNewsPostNotices
-                    .Where(y => y.UserId == userId))
-                .ProjectTo<NewsPostViewModel>()
-                .OrderByDescending(x => x.Created)
-                .AsQueryable();
-
-            if (criteria.FromTime.HasValue)
-                newsPosts = newsPosts.Where(x => x.Created >= criteria.FromTime.Value);
-
-            if (criteria.ToTime.HasValue)
-                newsPosts = newsPosts.Where(x => x.Created <= criteria.ToTime.Value);
-
-            var response = new DataPageResponse<NewsPostViewModel>()
+            var viewModelBuilder = new DataPageViewModelBuilder<NewsPostViewModel>()
             {
-                PageIndex = request.PageIndex.Value,
-                PageSize = request.PageSize.Value,
-                TotalRowCount = await newsPosts.CountAsync(),
-                Rows = await newsPosts.Skip(request.PageIndex.Value * request.PageSize.Value)
-                                 .Take(request.PageSize.Value)
-                                 .ToArrayAsync()
+                Query = DataContext.NewsPosts
+                    .Include(x => x.UnreadNewsPostNotices
+                        .Where(y => y.UserId == userId))
+                    .ProjectTo<NewsPostViewModel>(),
+                Sort = query => query.OrderByDescending(x => x.Created)
             };
 
-            response.Validate();
-
-            return Ok(response);
+            return Ok(await viewModelBuilder.Build(request));
         }
 
         [HttpGet("{id}")]
@@ -135,7 +117,7 @@ namespace DFA.Web.Api.NewsPosts
 
             await DataContext.SaveChangesAsync();
 
-            await ApiEventsService.RaiseEvent("api/newsposts/created", newsPost.MapTo<NewsPostEventViewModel>());
+            RaiseApiEvent("created", newsPost.MapTo<NewsPostEventViewModel>());
 
             return Ok();
         }
@@ -158,7 +140,9 @@ namespace DFA.Web.Api.NewsPosts
             DataContext.NewsPosts.Update(newsPost);
             DataContext.SaveChanges();
 
-            //RaiseApiEvent("modified", newsPost.MapTo<NewsPostViewModel>());
+            var newsPostEventViewModel = newsPost.MapTo<NewsPostEventViewModel>();
+            RaiseApiEvent("modified", newsPostEventViewModel);
+            RaiseApiEvent($"{request.Id}/modified", newsPostEventViewModel);
 
             return Ok();
         }
@@ -179,7 +163,9 @@ namespace DFA.Web.Api.NewsPosts
             DataContext.NewsPosts.Remove(newsPost);
             await DataContext.SaveChangesAsync();
 
-            //RaiseApiEvent("deleted", newsPost.MapTo<NewsPostEventViewModel>());
+            var newsPostEventViewModel = newsPost.MapTo<NewsPostEventViewModel>();
+            RaiseApiEvent("modified", newsPostEventViewModel);
+            RaiseApiEvent($"{request.Id}/modified", newsPostEventViewModel);
 
             return Ok();
         }
@@ -196,50 +182,33 @@ namespace DFA.Web.Api.NewsPosts
             if (request.PageSize > 10)
                 request.PageSize = 10;
 
-            var newsPostsCount = 0;
-            var newsPosts = new NewsPostViewModel[0];
+            var viewModelBuilder = new DataPageViewModelBuilder<NewsPostViewModel>();
 
-            if(AppAuthenticationService.CurrentUserClaims != null)
+            if (AppAuthenticationService.CurrentUserClaims != null)
             {
-                var newsPostsQuery = DataContext.UnreadNewsPostNotices
-                    .Where(x => x.UserId == AppAuthenticationService.CurrentUserClaims.Id)
-                    .Select(x => x.NewsPost);
+                viewModelBuilder.Query = DataContext.NewsPosts
+                    .Include(x => x.UnreadNewsPostNotices
+                        .Where(y => y.UserId == AppAuthenticationService.CurrentUserClaims.Id))
+                    .ProjectTo<NewsPostViewModel>();
 
-                newsPostsCount = await newsPostsQuery
-                    .CountAsync();
-
-                newsPosts = await newsPostsQuery
-                    .Skip(request.PageIndex.Value * request.PageSize.Value)
-                    .Take(request.PageSize.Value)
-                    .ProjectTo<NewsPostViewModel>()
-                    .ToArrayAsync();
+                viewModelBuilder.Sort = query => query.OrderByDescending(x => x.Created);
             }
 
-            return Ok(new DataPageResponse<NewsPostViewModel>()
-            {
-                PageIndex = request.PageIndex.Value,
-                PageSize = request.PageSize.Value,
-                TotalRowCount = newsPostsCount,
-                Rows = newsPosts
-            });
+            return Ok(viewModelBuilder.Build(request));
         }
 
         [HttpGet("unread/count")]
         [AllowAnonymous]
         public async Task<IActionResult> UnreadCount()
-        {
-            var count = (AppAuthenticationService.CurrentUserClaims == null)
-                ? 0
-                : await DataContext.UnreadNewsPostNotices
-                    .Where(x => x.UserId == AppAuthenticationService.CurrentUserClaims.Id)
-                    .Select(x => x.NewsPost)
-                    .CountAsync();
-
-            return Ok(new CountViewModel()
+            => Ok(new CountViewModel()
             {
-                Count = count
+                Count = (AppAuthenticationService.CurrentUserClaims == null)
+                    ? 0
+                    : await DataContext.UnreadNewsPostNotices
+                        .Where(x => x.UserId == AppAuthenticationService.CurrentUserClaims.Id)
+                        .Select(x => x.NewsPost)
+                        .CountAsync()
             });
-        }
 
         [HttpPost("created/subscribe")]
         [HttpPost("modified/subscribe")]
@@ -248,7 +217,7 @@ namespace DFA.Web.Api.NewsPosts
         [HttpPost("{id}/deleted/subscribe")]
         [AllowAnonymous]
         public Task<IActionResult> Subscribe([FromBody] ApiEventsSubscriptionRequest request)
-            => SubscribeApiEvent(request);
+            => AddApiEventSubscription(request);
 
         [HttpPost("created/unsubscribe")]
         [HttpPost("modified/unsubscribe")]
@@ -257,7 +226,7 @@ namespace DFA.Web.Api.NewsPosts
         [HttpPost("{id}/deleted/unsubscribe")]
         [AllowAnonymous]
         public Task<IActionResult> Unsubscribe([FromBody] ApiEventsSubscriptionRequest request)
-            => UnsubscribeApiEvent(request);
+            => RemoveApiEventSubscription(request);
 
         #endregion Methods
 

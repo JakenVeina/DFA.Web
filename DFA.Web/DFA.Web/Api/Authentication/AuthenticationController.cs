@@ -145,9 +145,11 @@ namespace DFA.Web.Api.Authentication
                 ++user.LoginCredential.SuccessiveFailedLoginCount;
                 DeferEntityUpdate(user.LoginCredential, x => x.SuccessiveFailedLoginCount);
 
+                // TODO: Pull lockout count from config
                 if (user.LoginCredential.SuccessiveFailedLoginCount >= 10)
                 {
-                    user.LoginCredential.LockoutEnd = DateTime.UtcNow.AddMinutes(30); // TODO: Pull lockout duration from config?
+                    // TODO: Pull lockout duration from config
+                    user.LoginCredential.LockoutEnd = DateTime.UtcNow.AddMinutes(30);
                     DeferEntityUpdate(user.LoginCredential, x => x.LockoutEnd);
                     DeferLogEntry(LogLevelType.Warning, "LockoutStarted", user);
                     return Forbid(user.LoginCredential.MapTo<LockoutViewModel>());

@@ -39,8 +39,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="WebApp\app\common\EntityCount.ts" />
-    <None Remove="WebApp\app\components\news\NewsPostsService.ts" />
+    <None Remove="WebApp\app\common\count-view-model.ts" />
+    <None Remove="WebApp\app\common\data-page-request.ts" />
+    <None Remove="WebApp\app\common\data-page-view-model.ts" />
+    <None Remove="WebApp\app\common\lazy.ts" />
+    <None Remove="WebApp\app\components\news\news-post-event-view-model.ts" />
+    <None Remove="WebApp\app\components\news\news-post-view-model.ts" />
+    <None Remove="WebApp\app\components\news\news-posts-service.ts" />
+    <None Remove="WebApp\app\components\user\user-view-model.ts" />
+    <None Remove="WebApp\app\events\api-event-service.ts" />
+    <None Remove="WebApp\app\events\api-event-subscription-request.ts" />
   </ItemGroup>
 
   <ItemGroup>
@@ -52,19 +60,27 @@
   </ItemGroup>
 
   <ItemGroup>
-    <TypeScriptCompile Include="WebApp\app\common\EntityCount.ts" />
+    <TypeScriptCompile Include="WebApp\app\common\count-view-model.ts" />
+    <TypeScriptCompile Include="WebApp\app\common\data-page-request.ts" />
+    <TypeScriptCompile Include="WebApp\app\common\data-page-view-model.ts" />
+    <TypeScriptCompile Include="WebApp\app\common\lazy.ts" />
     <TypeScriptCompile Include="WebApp\app\components\nav-menu\nav-menu-items\nav-menu-item-offline.component.ts" />
     <TypeScriptCompile Include="WebApp\app\components\nav-menu\nav-menu-items\nav-menu-item-active.component.ts" />
     <TypeScriptCompile Include="WebApp\app\components\nav-menu\nav-menu-items\nav-menu-item-inactive.component.ts" />
     <TypeScriptCompile Include="WebApp\app\components\nav-menu\nav-menu-items\nav-menu-item-news.component.ts" />
     <TypeScriptCompile Include="WebApp\app\components\nav-menu\nav-menu-items\nav-menu-item-profile.component.ts" />
-    <TypeScriptCompile Include="WebApp\app\components\nav-menu\nav-menu-items\NavMenuItemBase.ts" />
-    <TypeScriptCompile Include="WebApp\app\components\nav-menu\nav-menu-items\NavMenuItemState.ts" />
+    <TypeScriptCompile Include="WebApp\app\components\nav-menu\nav-menu-items\nav-menu-item-base.ts" />
+    <TypeScriptCompile Include="WebApp\app\components\nav-menu\nav-menu-items\nav-menu-item-state.ts" />
     <TypeScriptCompile Include="WebApp\app\components\nav-menu\nav-menu.component.ts" />
     <TypeScriptCompile Include="WebApp\app\components\nav-menu\nav-menu.module.ts" />
     <TypeScriptCompile Include="WebApp\app\components\news\news-page.component.ts" />
+    <TypeScriptCompile Include="WebApp\app\components\news\news-post-view-model.ts" />
     <TypeScriptCompile Include="WebApp\app\components\news\news.module.ts" />
-    <TypeScriptCompile Include="WebApp\app\components\news\NewsPostsService.ts" />
+    <TypeScriptCompile Include="WebApp\app\components\news\news-post-event-view-model.ts" />
+    <TypeScriptCompile Include="WebApp\app\components\news\news-posts-service.ts" />
+    <TypeScriptCompile Include="WebApp\app\components\user\user-view-model.ts" />
+    <TypeScriptCompile Include="WebApp\app\events\api-event-service.ts" />
+    <TypeScriptCompile Include="WebApp\app\events\api-event-subscription-request.ts" />
   </ItemGroup>
 
   <Target Name="DebugRunWebpack" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('wwwroot\dist') ">

@@ -1,22 +1,22 @@
-﻿import { Component } from '@angular/core';
+﻿import { Component } from "@angular/core";
 
-import { NavMenuItemBase } from './NavMenuItemBase';
-import { NavMenuItemState } from './NavMenuItemState';
+import { NavMenuItemBase } from "./nav-menu-item-base";
+import { NavMenuItemState } from "./nav-menu-item-state";
 
 @Component({
-    selector: 'nav-menu-item-profile',
-    templateUrl: './nav-menu-item.component.html',
-    styleUrls: ['./nav-menu-item.component.css']
+    selector: "nav-menu-item-profile",
+    templateUrl: "./nav-menu-item.component.html",
+    styleUrls: ["./nav-menu-item.component.css"]
 })
 export class NavMenuItemProfileComponent extends NavMenuItemBase {
     /* NavMenuItemBase Members ************************************************/
-    protected get IconName(): string {
+    protected get iconName(): string {
         return "account_box";
     }
-    protected get Title(): string {
+    protected get title(): string {
         return "Profile";
     }
-    protected get State(): NavMenuItemState {
-        return NavMenuItemState.Active;
+    protected get state(): NavMenuItemState {
+        return NavMenuItemState.active;
     }
 }

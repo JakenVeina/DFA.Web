@@ -79,8 +79,8 @@ namespace DFA.Web.Api
         [AllowAnonymous]
         public async Task<IActionResult> Post(int id)
         {
-            await ApiEventsService.RaiseEvent("api/test/somethinghappened", new { id = id });
-            await ApiEventsService.RaiseEvent($"api/test/{id}/somethinghappened", new { id = id });
+            RaiseApiEvent("somethinghappened", new { id = id });
+            RaiseApiEvent($"{id}/somethinghappened", new { id = id });
 
             return Ok();
         }
@@ -96,26 +96,14 @@ namespace DFA.Web.Api
         [HttpPost("{id}/somethinghappened/subscribe")]
         [AllowAnonymous]
         public Task<IActionResult> Subscribe([FromBody] ApiEventsSubscriptionRequest request)
-            => SubscribeApiEvent(request);
+            => AddApiEventSubscription(request);
 
         [HttpPost("somethinghappened/unsubscribe")]
         [HttpPost("{id}/somethinghappened/unsubscribe")]
         [AllowAnonymous]
         public Task<IActionResult> Unsubscribe([FromBody] ApiEventsSubscriptionRequest request)
-            => UnsubscribeApiEvent(request);
+            => RemoveApiEventSubscription(request);
 
         #endregion Methods
-
-        /**********************************************************************/
-        #region ApiEventControllerBase Overrides
-
-        //protected internal override IReadOnlyCollection<string> ApiEventNames { get; }
-        //    = new[]
-        //    {
-        //        "somethinghappened"
-        //    };
-
-        #endregion ApiEventControllerBase Overrides
-
     }
 }

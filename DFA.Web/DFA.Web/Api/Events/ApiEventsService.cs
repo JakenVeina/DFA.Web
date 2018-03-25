@@ -45,7 +45,7 @@ namespace DFA.Web.Api.Events
             return _connectionIdsBySubscriptionToken.TryRemove(connectionId, out _);
         }
 
-        public async Task<bool> Subscribe(string subscriptionToken, string name)
+        public async Task<bool> AddSubscription(string subscriptionToken, string name)
         {
             Contract.Requires(!subscriptionToken.IsNullOrWhitespace());
             Contract.Requires(!name.IsNullOrWhitespace());
@@ -58,7 +58,7 @@ namespace DFA.Web.Api.Events
             return true;
         }
 
-        public async Task<bool> Unsubscribe(string subscriptionToken, string name)
+        public async Task<bool> RemoveSubscription(string subscriptionToken, string name)
         {
             Contract.Requires(!subscriptionToken.IsNullOrWhitespace());
             Contract.Requires(!name.IsNullOrWhitespace());
@@ -75,10 +75,12 @@ namespace DFA.Web.Api.Events
         {
             Contract.Requires(!name.IsNullOrWhitespace());
 
+            var normalizedName = name.ToLower();
+
             return ApiEventsHubContext
                 .Clients
-                .Group(name)
-                .SendAsync(nameof(RaiseEvent), name.ToLower(), data);
+                .Group(normalizedName)
+                .SendAsync(nameof(RaiseEvent), normalizedName, data);
         }
 
         #endregion IEventsService

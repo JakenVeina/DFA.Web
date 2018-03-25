@@ -11,7 +11,7 @@ using DFA.Web.Models.Entities;
 
 namespace DFA.Web.Api.NewsPosts
 {
-    [MapsFrom(typeof(NewsPostEventViewModel))]
+    [MapsFrom(typeof(NewsPost))]
     public class NewsPostEventViewModel
     {
         /**********************************************************************/

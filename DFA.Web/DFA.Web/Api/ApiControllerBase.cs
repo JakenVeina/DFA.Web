@@ -52,6 +52,23 @@ namespace DFA.Web.Api
         /**********************************************************************/
         #region Protected Properties
 
+        private static string _eventPrefix;
+        internal protected virtual string EventPrefix
+        {
+            get
+            {
+                if(_eventPrefix == null)
+                    _eventPrefix = GetType()
+                        .GetCustomAttributes(true)
+                        .OfType<RouteAttribute>()
+                        .First()
+                        .Template;
+
+                return _eventPrefix;
+            }
+        }
+
+
         internal protected DFAWebDataContext DataContext { get; }
 
         internal protected IApiEventsService ApiEventsService { get; }
@@ -65,7 +82,15 @@ namespace DFA.Web.Api
         /**********************************************************************/
         #region Protected Methods
 
-        internal protected async Task<IActionResult> SubscribeApiEvent(ApiEventsSubscriptionRequest request, string suffix = "/subscribe")
+        internal protected void RaiseApiEvent(string name, object data)
+            => DeferredActionService.AddAction(() =>
+                ApiEventsService.RaiseEvent(
+                      AttributeRouteModel.ReplaceTokens(
+                          AttributeRouteModel.CombineTemplates(EventPrefix, name),
+                          ControllerContext.ActionDescriptor.RouteValues),
+                      data));
+
+        internal protected async Task<IActionResult> AddApiEventSubscription(ApiEventsSubscriptionRequest request, string suffix = "/subscribe")
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -78,13 +103,13 @@ namespace DFA.Web.Api
             if (name.StartsWith('/'))
                 name = name.Substring(1);
 
-            if (!(await ApiEventsService.Subscribe(request.SubscriptionToken, name)))
+            if (!(await ApiEventsService.AddSubscription(request.SubscriptionToken, name)))
                 return BadRequest(new InvalidSubscriptionTokenViewModel(request.SubscriptionToken));
 
             return Ok();
         }
 
-        internal protected async Task<IActionResult> UnsubscribeApiEvent(ApiEventsSubscriptionRequest request, string suffix = "/unsubscribe")
+        internal protected async Task<IActionResult> RemoveApiEventSubscription(ApiEventsSubscriptionRequest request, string suffix = "/unsubscribe")
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -97,7 +122,7 @@ namespace DFA.Web.Api
             if (name.StartsWith('/'))
                 name = name.Substring(1);
 
-            if (!(await ApiEventsService.Unsubscribe(request.SubscriptionToken, name)))
+            if (!(await ApiEventsService.RemoveSubscription(request.SubscriptionToken, name)))
                 return BadRequest(new InvalidSubscriptionTokenViewModel(request.SubscriptionToken));
 
             return Ok();
@@ -136,17 +161,5 @@ namespace DFA.Web.Api
             => $"{GetType().Name}.{callerName}.{actionName}";
 
         #endregion Private Methods
-
-        /**********************************************************************/
-        #region Private Fields
-
-        private static readonly IReadOnlyCollection<string> _fullEventNameSuffixes
-            = new[]
-            {
-                "/subscribe",
-                "/unsubscribe",
-            };
-
-        #endregion Private Fields
     }
 }

@@ -14,9 +14,9 @@ namespace DFA.Web.Api.Events
 
         bool CancelSubscriptionToken(string connectionId);
 
-        Task<bool> Subscribe(string subscriptionToken, string name);
+        Task<bool> AddSubscription(string subscriptionToken, string name);
 
-        Task<bool> Unsubscribe(string subscriptionToken, string name);
+        Task<bool> RemoveSubscription(string subscriptionToken, string name);
 
         Task RaiseEvent(string name, object data);
 

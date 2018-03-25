@@ -1,9 +1,9 @@
 ﻿import { Component } from "@angular/core";
 
-import { NewsPostsService } from "../../news/NewsPostsService";
+import { NewsPostsService } from "../../news/news-posts-service";
 
-import { NavMenuItemBase } from "./NavMenuItemBase";
-import { NavMenuItemState } from "./NavMenuItemState";
+import { NavMenuItemBase } from "./nav-menu-item-base";
+import { NavMenuItemState } from "./nav-menu-item-state";
 
 
 @Component({
@@ -17,21 +17,20 @@ export class NavMenuItemNewsComponent extends NavMenuItemBase {
         private _newsPostsService: NewsPostsService) {
         super();
 
-        _newsPostsService.GetUnreadCount()
-            .subscribe(count => this._unreadNewsPosts = count);
+        // TODO
     }
 
     /* NavMenuItemBase Members ************************************************/
-    protected get IconName(): string {
+    protected get iconName(): string {
         return "subject";
     }
-    protected get Title(): string {
+    protected get title(): string {
         return "News";
     }
-    protected get State(): NavMenuItemState {
-        return (this._unreadNewsPosts > 0) ? NavMenuItemState.Active : NavMenuItemState.Inactive;
+    protected get state(): NavMenuItemState {
+        return (this._unreadNewsPosts > 0) ? NavMenuItemState.active : NavMenuItemState.inactive;
     }
-    protected get StateText(): string {
+    protected get stateText(): string {
         return this._unreadNewsPosts.toString();
     }
 

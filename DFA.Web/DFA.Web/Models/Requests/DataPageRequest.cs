@@ -5,6 +5,8 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Threading.Tasks;
 
+using Newtonsoft.Json;
+
 namespace DFA.Web.Models.Requests
 {
     public class DataPageRequest
@@ -13,12 +15,19 @@ namespace DFA.Web.Models.Requests
         #region Properties
 
         [Range(0, int.MaxValue)]
-        public int? PageIndex { get; set; }
+        public int? FirstRowIndex { get; set; }
             = 0;
 
         [Range(0, int.MaxValue)]
-        public int? PageSize { get; set; }
+        public int? LastRowIndex { get; set; }
             = int.MaxValue;
+
+        [JsonIgnore]
+        public int PageSize
+        {
+            get => LastRowIndex.Value - FirstRowIndex.Value + 1;
+            set => LastRowIndex = FirstRowIndex.Value + value - 1;
+        }
 
         #endregion Properties
     }

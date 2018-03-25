@@ -32,9 +32,8 @@ namespace DFA.Web.Mapping
             Contract.Requires(configuration != null);
             Contract.Requires(attachedType != null);
 
-            // TODO: Is this a problem? Should CreateMap return void instead?
             CreateMap(configuration, attachedType, attachedType, TargetType);
-            return CreateMap(configuration, attachedType, attachedType, TargetType);
+            return CreateMap(configuration, attachedType, TargetType, attachedType);
         }
 
         #endregion MappingAttribute
